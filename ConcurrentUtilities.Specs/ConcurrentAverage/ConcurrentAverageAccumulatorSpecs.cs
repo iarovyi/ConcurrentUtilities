@@ -1,5 +1,6 @@
 ﻿namespace ConcurrentUtilities.Specs.ConcurrentAverage
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -45,17 +46,18 @@
             average.Should().Be(expectedAverage);
         }
 
-        /*TODO
         [Fact]
+        //TODO: optimize resource consumption
         public void Should_add_values_thread_safely()
         {
             var counter = new ConcurrentAverageAccumulator();
-            var range = Enumerable.Range(1, 100000);
-            var expectedValue = (int)range.Average();
+            int[] range = Enumerable.Range(1, 10000).OrderBy(i=> Guid.NewGuid()).ToArray();
+            int expectedAverage = range.Sum()/range.Count();
 
-            range.AsParallel().ForEach(counter.Add);
+            Parallel.ForEach(range, new ParallelOptions { MaxDegreeOfParallelism = 20 }, counter.Add);
+            var average = counter.GetAverage();
 
-            counter.GetAverage().Should().Be(expectedValue);
-        }*/
+            average.Should().Be(expectedAverage);
+        }
     }
 }
